@@ -150,7 +150,7 @@ class Fat16Reader:
             # it can only be a directory because cd won't run otherwise, so let's parse the dir
             self._current_entries.extend(self._read_directory(cluster_start))
 
-    def _compose_file(self, clusters_list, entry:DirectoryEntry):
+    def _compose_file(self, clusters_list, entry: DirectoryEntry):
         file = FileInfo(entry.filename, entry.extension, entry.filesize, b'')
         bytes = entry.filesize
         file_bytes = []
@@ -162,11 +162,13 @@ class Fat16Reader:
                 (cluster - self._fat_cluster_read_start)
             if bytes >= cluster_bytes:
                 # file contains all this cluster
-                file_bytes.append(self.image[cluster_start:cluster_start+cluster_bytes])
+                file_bytes.append(
+                    self.image[cluster_start:cluster_start+cluster_bytes])
                 bytes -= cluster_bytes
             else:
                 # this is only/last cluster, so we take all the remaining bytes
-                file_bytes.append(self.image[cluster_start:cluster_start+bytes])
+                file_bytes.append(
+                    self.image[cluster_start:cluster_start+bytes])
         file.bytes = file_bytes[0]
         return file
 
@@ -175,7 +177,16 @@ class Fat16Reader:
     def ls(self):
         """Shows info about the current directory"""
         if self.do_print_on_commands:
-            pass
+            print("MODE\t\t\t\tSIZE\t\t\tNAME")
+            for entry in self._current_entries:
+                if "archive" in entry.attributes or "read_only" in entry.attributes:
+                    print(f"{entry.attributes}\t\t\t", end="")
+                    print(f"{entry.filesize}\t\t\t", end="")
+                    print(f"{entry.filename}.{entry.extension}\t\t\t")
+                else:
+                    print(f"{entry.attributes}\t\t\t", end="")
+                    print(f"{entry.filesize}\t\t\t", end="")
+                    print(f"{entry.filename}\t\t\t")
         return self._current_entries
 
     def cd(self, directory_name) -> list[DirectoryEntry]:
@@ -217,6 +228,9 @@ class Fat16Reader:
             return None
         if not found and not self.do_print_on_commands:
             raise self.NotAFileException()
+        if self.do_print_on_commands:
+            print(f"{file.filename}.{file.extension} content =\n" +
+                  str(file.bytes, "utf-8"))
         return file
 
     def print_first_n_bytes(self, n):
@@ -230,7 +244,7 @@ class Fat16Reader:
     class NotADirectoryException(Exception):
         def __init__(self, message="There is no such directory"):
             super().__init__(message)
-            
+
     class NotAFileException(Exception):
         def __init__(self, message="There is no such file"):
             super().__init__(message)

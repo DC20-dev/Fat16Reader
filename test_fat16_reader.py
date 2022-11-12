@@ -4,7 +4,7 @@ from fat16_reader import Fat16Reader
 
 class Fat16Test(unittest.TestCase):
     def setUp(self):
-        self.reader = Fat16Reader("test.img")
+        self.reader = Fat16Reader("test.img", True)
 
     def test_print(self):
         # visual test
@@ -87,6 +87,11 @@ class Fat16Test(unittest.TestCase):
         self.assertEqual(file.filesize, 4)
         self.assertEqual(file.bytes, b'one\n')
         self.assertEqual(str(file.bytes, "utf-8"), "one\n")
+
+    def test_ls(self):
+        self.reader.ls()
+        self.reader.cd("TEST")
+        self.reader.ls()
 
 if __name__ == "__main__":
     unittest.main()
