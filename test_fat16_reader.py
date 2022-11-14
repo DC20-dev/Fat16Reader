@@ -79,6 +79,10 @@ class Fat16Test(unittest.TestCase):
         test_entries = self.reader.cd(".")
         self.assertEqual(len(test_entries), 4)
 
+    def test_no_such_directory(self):
+        self.reader.do_print_on_commands = False
+        self.assertRaises(Fat16Reader.NotADirectoryException, lambda: self.reader.cd(""))
+
     def test_open_file(self):
         entries = self.reader.cd("TEST")
         file = self.reader.open_file("ONE")
@@ -87,6 +91,10 @@ class Fat16Test(unittest.TestCase):
         self.assertEqual(file.filesize, 4)
         self.assertEqual(file.bytes, b'one\n')
         self.assertEqual(str(file.bytes, "utf-8"), "one\n")
+
+    def test_no_such_file(self):
+        self.reader.do_print_on_commands = False
+        self.assertRaises(Fat16Reader.NotAFileException ,lambda: self.reader.open_file(""))
 
     def test_ls(self):
         self.reader.ls()
